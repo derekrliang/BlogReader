@@ -23,7 +23,10 @@ import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainListActivity extends ListActivity {
@@ -33,13 +36,17 @@ public class MainListActivity extends ListActivity {
 	public static final String TAG = MainListActivity.class.getSimpleName();
 	protected JSONObject mBlogData;
 	protected String[] mBlogPostTitles;
+	protected ProgressBar mProgressBar;
 			
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main_list);
 		
+		mProgressBar = (ProgressBar) findViewById(R.id.progressBar1);
+		
 		if (isNetworkAvailable()) {
+			mProgressBar.setVisibility(View.VISIBLE);
 			GetBlogPostsTask getBlogPostsTask = new GetBlogPostsTask();
 			getBlogPostsTask.execute();
 		}
@@ -48,28 +55,6 @@ public class MainListActivity extends ListActivity {
 			Toast.makeText(this, "Network is unavailable!", Toast.LENGTH_LONG).show();
 		}
 		
-		/*
-		String status = jsonResponse.getString("status");
-		Log.v(TAG, status);
-		
-		JSONArray jsonPosts = jsonResponse.getJSONArray("posts");
-		for (int i = 0; i < jsonPosts.length(); ++i) {
-			 JSONObject jsonPost = jsonPosts.getJSONObject(i);
-			 String title = jsonPost.getString("title");
-			 Log.v(TAG, "Post " + i + ": " + title);
-		}
-		*/
-		
-		/*
-		Resources resources = getResources();
-		mAndroidNames = resources.getStringArray(R.array.android_names);
-		
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAndroidNames);
-		setListAdapter(adapter);
-		*/
-		
-		//String message = getString(R.string.no_items);
-		//Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 	}
 
 	private boolean isNetworkAvailable() {
@@ -104,14 +89,11 @@ public class MainListActivity extends ListActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public void updateList() {
+	public void handleBlogResponse() {
+		mProgressBar.setVisibility(View.INVISIBLE);
+		
 		if (mBlogData == null) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getString(R.string.error_title));
-			builder.setMessage(getString(R.string.error_message));
-			builder.setPositiveButton(android.R.string.ok, null);
-			AlertDialog dialog = builder.create();
-			dialog.show();
+			updateDisplayForError();
 		}
 		else
 		{
@@ -133,6 +115,18 @@ public class MainListActivity extends ListActivity {
 				Log.e(TAG, "Exception caught!", e);
 			}
 		}
+	}
+
+	private void updateDisplayForError() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(getString(R.string.error_title));
+		builder.setMessage(getString(R.string.error_message));
+		builder.setPositiveButton(android.R.string.ok, null);
+		AlertDialog dialog = builder.create();
+		dialog.show();
+		
+		TextView emptyTextView = (TextView) getListView().getEmptyView();
+		emptyTextView.setText(getString(R.string.no_items));
 	}
 	
 	private class GetBlogPostsTask extends AsyncTask<Object, Void, JSONObject> {
@@ -179,7 +173,7 @@ public class MainListActivity extends ListActivity {
 		protected void onPostExecute(JSONObject result)
 		{
 			mBlogData = result;
-			updateList();
+			handleBlogResponse();
 		}
 	}
 }
