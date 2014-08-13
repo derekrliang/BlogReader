@@ -17,15 +17,17 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -59,7 +61,37 @@ public class MainListActivity extends ListActivity {
 		{
 			Toast.makeText(this, "Network is unavailable!", Toast.LENGTH_LONG).show();
 		}
+	}
+	
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id)
+	{
+		super.onListItemClick(l, v, position, id);
 		
+		try {
+			JSONArray jsonPosts = mBlogData.getJSONArray("posts");
+			JSONObject jsonPost = jsonPosts.getJSONObject(position);
+			String blogUrl = jsonPost.getString("url");
+			
+			// Opens in external browser:
+			/*
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			intent.setData(Uri.parse(blogUrl));
+			startActivity(intent);
+			*/
+			
+			// Open within our application (running a new Activity):
+			Intent intent = new Intent(this, BlogWebViewActivity.class);
+			intent.setData(Uri.parse(blogUrl));
+			startActivity(intent);
+			
+		} catch (JSONException e) {
+			logException(e);
+		}
+	}
+
+	private void logException(Exception e) {
+		Log.e(TAG, "Exception caught!", e);
 	}
 
 	private boolean isNetworkAvailable() {
@@ -73,13 +105,6 @@ public class MainListActivity extends ListActivity {
 		}
 		
 		return isAvailable;
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main_list, menu);
-		return true;
 	}
 
 	@Override
@@ -130,7 +155,7 @@ public class MainListActivity extends ListActivity {
 				setListAdapter(adapter);
 				
 			} catch (JSONException e) {
-				Log.e(TAG, "Exception caught!", e);
+				logException(e);
 			}
 		}
 	}
@@ -177,11 +202,11 @@ public class MainListActivity extends ListActivity {
 				}
 				
 			} catch (MalformedURLException e) {
-				Log.e(TAG, "Exception caught: ", e);
+				logException(e);
 			} catch (IOException e) {
-				Log.e(TAG, "Exception caught: ", e);
+				logException(e);
 			} catch (Exception e) {
-				Log.e(TAG, "Exception caught: ", e);
+				logException(e);
 			}
 			
 			return jsonResponse;
