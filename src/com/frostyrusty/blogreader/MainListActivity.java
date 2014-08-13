@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -105,7 +106,12 @@ public class MainListActivity extends ListActivity {
 
 	public void updateList() {
 		if (mBlogData == null) {
-			// TODO: Handle error..
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle(getString(R.string.error_title));
+			builder.setMessage(getString(R.string.error_message));
+			builder.setPositiveButton(android.R.string.ok, null);
+			AlertDialog dialog = builder.create();
+			dialog.show();
 		}
 		else
 		{
