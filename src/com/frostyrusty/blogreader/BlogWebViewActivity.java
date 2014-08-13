@@ -10,6 +10,8 @@ import android.webkit.WebView;
 
 public class BlogWebViewActivity extends ActionBarActivity {
 
+	protected String mUrl;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -17,9 +19,10 @@ public class BlogWebViewActivity extends ActionBarActivity {
 		
 		Intent intent = getIntent();
 		Uri blogUri = intent.getData();
+		mUrl = blogUri.toString();
 		
 		WebView webView = (WebView) findViewById(R.id.webView1);
-		webView.loadUrl(blogUri.toString());
+		webView.loadUrl(mUrl);
 	}
 
 	@Override
@@ -38,6 +41,16 @@ public class BlogWebViewActivity extends ActionBarActivity {
 		if (id == R.id.action_settings) {
 			return true;
 		}
+		else if (id == R.id.action_share) {
+			sharePost();
+		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void sharePost() {
+		Intent shareIntent = new Intent(Intent.ACTION_SEND);
+		shareIntent.setType("text/plain");
+		shareIntent.putExtra(Intent.EXTRA_TEXT, mUrl);
+		startActivity(Intent.createChooser(shareIntent, getString(R.string.share_chooser_title)));
 	}
 }
