@@ -18,9 +18,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 public class MainListActivity extends ListActivity {
@@ -29,6 +31,7 @@ public class MainListActivity extends ListActivity {
 	public static final int NUMBER_OF_POSTS = 20;
 	public static final String TAG = MainListActivity.class.getSimpleName();
 	protected JSONObject mBlogData;
+	protected String[] mBlogPostTitles;
 			
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +110,19 @@ public class MainListActivity extends ListActivity {
 		else
 		{
 			try {
-				Log.d(TAG, mBlogData.toString(2));
+				// Log.d(TAG, mBlogData.toString(2));
+				JSONArray jsonPosts = mBlogData.getJSONArray("posts");
+				mBlogPostTitles = new String[jsonPosts.length()];
+				for (int i = 0; i < jsonPosts.length(); ++i) {
+					JSONObject post = jsonPosts.getJSONObject(i);
+					String title = post.getString("title");
+					title = Html.fromHtml(title).toString();
+					mBlogPostTitles[i] = title;
+				}
+				
+				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mBlogPostTitles);
+				setListAdapter(adapter);
+				
 			} catch (JSONException e) {
 				Log.e(TAG, "Exception caught!", e);
 			}
